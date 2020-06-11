@@ -31,6 +31,7 @@
                      <th class="text-center" style='width:10%;font-weight:bold'>أسم الزبون</th>
                      <th class="text-center" style='width:10%;font-weight:bold'>الهاتف</th>
                      <th class="text-center" style='width:10%;font-weight:bold'>العنوان</th>
+                     <th class="text-center" style='width:10%;font-weight:bold'>حسابه</th>
                      <th class="text-center" style='width:10%;font-weight:bold'>المدفوع</th>
                      <th class="text-center" style='width:10%;font-weight:bold'>المتبقي</th>
                      <th class="text-center" style='width:10%;font-weight:bold'>الحدث</th>
@@ -44,7 +45,7 @@
                           <td class='text-center'>{{$row->name}}</td>
                           <td class='text-center'>{{$row->phone}}</td>
                           <td class='text-center'>{{$row->address}}</td>
-                          <td class='text-center'>{{$row->total}}</td>
+                          <td class='text-center'>{{$row->balance}}</td>
                           <td class='text-center'>{{$row->paid}}</td>
                           <td class='text-center'>{{$row->remain}}</td>
                           <td class='text-center'>

@@ -60,3 +60,54 @@
   </div>
 </div>
 </section>
+
+@stop
+
+
+
+
+
+@section('jsCode')
+
+    <script>
+
+        $("#paid").on('keyup',function(){
+            var total = $("#total").val();
+            var paid = $("#paid").val();
+            var remain = total-paid;
+            $("#remain").val(remain);
+        })
+
+        $("#total").on('keyup',function(){
+            var total = $("#total").val();
+            var paid = $("#paid").val();
+            var remain = total-paid;
+            $("#remain").val(remain);
+        })
+
+        document.querySelector('.submit').addEventListener("click", function(){
+            window.btn_clicked = true;
+        });
+
+        window.onbeforeunload = function(){
+            if(!window.btn_clicked){
+                return "Seems Like you wanna leave ?";
+            }
+        };
+
+        $('body').on('click', '.remove_inst', function () {
+            var didConfirm = confirm("Are you sure you want to delete");
+            if (didConfirm == true) {
+                $(this).parent().parent().remove();
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+
+
+
+    </script>
+
+@stop
