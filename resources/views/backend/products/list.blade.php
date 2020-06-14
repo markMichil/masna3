@@ -1,6 +1,6 @@
 @extends('backend.layouts.layout')
 @section('content')
-
+   <?php  use Milon\Barcode\DNS1D; ?>
 
     <section id="min-wrapper" xmlns="http://www.w3.org/1999/html">
   <div id="main-content">
@@ -33,7 +33,7 @@
                      <th class="text-center"  style='width:10%;font-weight:bold'>باركود</th>
                      <th class="text-center"  style='width:10%;font-weight:bold'>صورة</th>
                      <th class="text-center"  style='width:10%;font-weight:bold'>الأسم</th>
-                     <th class="text-center"  style='width:10%;font-weight:bold'>القسم</th>
+                     <th class="text-center"  style='width:10%;font-weight:bold'>المصنع</th>
                      <th class="text-center"  style='width:10%;font-weight:bold'>الكمية</th>
                      <th class="text-center"  style='width:10%;font-weight:bold'>السعر</th>
                      <th class="text-center"  style='width:15%;font-weight:bold'>الحدث</th>
@@ -51,7 +51,7 @@
 
                           <td class='text-center'>{{$key+1}}</td>
                           <td class='text-center'>{{explode(' ',$row->created_at)[0]}}</td>
-                          <td class='text-center'>{{$row->pro_code}}
+                          <td class='text-center'>{{$row->code}}
 <br>
 
                               <input type="number" id="{{$key+1}}copy"  min="1" value="1" style="
@@ -61,24 +61,29 @@
 
                           </td>
                            <td class='text-center' id="{{$key+1}}printTable">
-                               <?php echo '<br><img src="data:image/png;base64,' . DNS1D::getBarcodePNG($row->pro_code, "c128",2,50) . '" alt="barcode"   />'; ?>
+                               <?php echo '<br><img src="data:image/png;base64,' . DNS1D::getBarcodePNG($row->code, "c128",2,50) . '" alt="barcode"   />'; ?>
                                    <h2> {{$row->pro_code}}</h2>
                              </td>
                           <td class='text-center'><img src="{{url($row->image)}}" style="width:70px;height:70px;border:1px solid #ddd"></td>
-                          <td class='text-center'>{{$row->slug}}</td>
+                          <td class='text-center'>{{$row->name}}</td>
                           <td class='text-center'>
-                            @if(App\Category::where('id',$row->cat_id)->count() > 0 )
-                               @foreach(App\Category::where('id',$row->cat_id)->get() as $sub) @endforeach
-                              <span class="label label-warning">{{$sub->slug}}</span>
-                            @endif  
+                              {{$row['factory']['name']}}
                           </td>
-                          <td class='text-center'>{{$row->qty}}</td>
-                          <td class='text-center'>{{$row->price}}</td>
+                          <td class='text-center'>{{$row->quantity}}</td>
+                          <td class='text-center'>{{$row->sell}}</td>
                           <td class='text-center'>
-                          	 {!! Form::Open(['url'=>'products/del/'.$row->id]) !!}
-                                 <a href="{{ url('products/edit/'.$row->id) }}" target="_blank" class="btn btn-success"><i class="fa fa-edit"></i> تعديل</a><br><br>
-                                 <button class="btn btn-danger confirmClickAction"><i class="fa fa-trash"></i> حذف</button>
-                              {!! Form::Close() !!}
+                              <form action="{{ url('products' , $row->id ) }}" method="POST">
+                                  {{ csrf_field() }}
+                                  {{ method_field('DELETE') }}
+                                  <a href="{{url('/products')}}/{{$row->id}}/edit" class="btn btn-success">تعديل</a>
+                                  <button class="btn btn-danger confirmClickAction"><i class="fa fa-trash"></i> حذف</button>
+                              </form>
+
+
+{{--                          	 {!! Form::Open(['url'=>'products/del/'.$row->id]) !!}--}}
+{{--                                 <a href="{{ url('products/edit/'.$row->id) }}" target="_blank" class="btn btn-success"><i class="fa fa-edit"></i> تعديل</a><br><br>--}}
+{{--                                 <button class="btn btn-danger confirmClickAction"><i class="fa fa-trash"></i> حذف</button>--}}
+{{--                              {!! Form::Close() !!}--}}
                           </td>                       
                       </tr>
                   @endforeach

@@ -12,4 +12,9 @@ class factory extends Model
         'name', 'phone', 'address',
     ];
 
+    public function product()
+    {
+        return $this->hasOne('App\product');
+    }
+
 }

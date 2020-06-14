@@ -25,38 +25,44 @@
   <div class="alert alert-danger">
       <ul>
          @foreach ($errors->all() as $error)
-             <li>{{ $error }}</li>
+             <li>{{ $error }}rr</li>
          @endforeach
       </ul>
   </div>
 @endif
+    <?php $disableAction = 0; ?>
 
-      {!! Form::Open(['files'=>true]) !!}
-
+    <form role="form" action="{{route('products.store')}}" method="post" enctype="multipart/form-data">
+    @csrf
         <div class="col-md-6">
 
            <div class="form-group">
-              <label>القسم الفرعي</label>
-              <select name="cat_id" class="form-control" style="padding:0;padding-right:5px;">
+              <label>المصنع </label>
+              <select name="factory_id" class="form-control" style="padding:0;padding-right:5px;">
 
-                  @foreach(App\Category::where('parent',0)->get() as $cat)
-                      <option disabled>[ {{$cat->slug}} ]</option>
-                      @foreach(App\Category::where('parent',$cat->id)->get() as $sub)
-                          <option value="{{$sub->id}}">{{$sub->slug}}</option>
-                      @endforeach
+                  @if(count($factories)>0)
+                      <option disabled>[ اختر المصنع ]</option>
+                  @foreach($factories as $factory)
+
+                         <option value="{{$factory->id}}">{{$factory->name}}</option>
+
                   @endforeach
+                      @else
+                      {{$disableAction = 1 }}
+                      <option disabled>[ يجب إدخال  المصنع ]</option>
+                  @endif
                  
               </select>
            </div> 
 
            <div class="form-group">
               <label>كود العباية</label>
-              <input type="text" class="form-control" name="pro_code" style='text-transform:uppercase' required>
+              <input type="text" class="form-control" name="code" style='text-transform:uppercase' required>
            </div>
 
            <div class="form-group">
               <label>أسم العباية</label>
-              <input type="text" class="form-control" name="slug" required>
+              <input type="text" class="form-control" name="name" required>
            </div>
 
            <div class="form-group">
@@ -66,7 +72,7 @@
 
            <div class="form-group">
               <label>سعر البيع</label>
-              <input type="number" step="any" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="price" required>
+              <input type="number" step="any" min="0" style="padding:1px;padding-right:10px;" class="form-control"  name="price" required>
            </div>
 
      
@@ -89,19 +95,19 @@
 
         </div>
 
-        <div class="col-md-12">
-           <div class="form-group">
-             <label>وصف العباية</label>
-             <textarea class="form-control" rows="9" name="content"></textarea>
-           </div>
+{{--        <div class="col-md-12">--}}
+{{--           <div class="form-group">--}}
+{{--             <label>وصف العباية</label>--}}
+{{--             <textarea class="form-control" rows="9" name="content"></textarea>--}}
+{{--           </div>--}}
 
            <div class="form-group">
-              <button class="btn btn-primary"><i class="fa fa-check-circle"></i> حفظ</button>
+              <button {{($disableAction == 1 )?'disabled':''}} class="btn btn-primary"><i class="fa fa-check-circle"></i> حفظ</button>
               <a href="{{ url('products') }}" class="btn btn-danger">رجوع <i class="fa fa-undo"></i></a>
            </div>
         </div>
- 
-    {!! Form::Close() !!}
+
+</form>
     </div>
 
       </div>
