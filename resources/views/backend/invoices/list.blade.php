@@ -48,7 +48,6 @@
                           <td class='text-center'>{{$key+1}}</td>
                           <td class='text-center'>{{explode(' ',$row->created_at)[0]}}</td>
                           <td class='text-center'>{{$row->name}}</td>
-                          <td class='text-center'>{{App\Invoice_attribute::where('invoice_id',$row->id)->count()+1}}</td>
                           <td class='text-center'>{{$row->total}}</td>
                           <td class='text-center'>{{$row->paid}}</td>
                           <td class='text-center'>{{$row->remain}}</td>

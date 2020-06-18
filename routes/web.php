@@ -38,8 +38,10 @@ Route::post('customer/edit', 'ClientsController@update');
 Route::get('customer/delete/{id}', 'ClientsController@destroy');
 // ==========================Product Routs ========================================
 Route::resource('products','ProductController');
-
-// ========================================================================
+// ==========================Invoice Routs==============================================
+Route::resource('invoices','InvoicesController');
+// Route::get('invoices/getProduct','InvoicesController@get_products');
+// Route::post('invoices/create','InvoicesController@get_products');
 
 Route::get('logout', function(){
 auth()->logout();
