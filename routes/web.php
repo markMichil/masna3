@@ -36,8 +36,12 @@ Route::get('customer', 'ClientsController@show');
 Route::get('customer/edit/{id}', 'ClientsController@edit');
 Route::post('customer/edit', 'ClientsController@update');
 Route::get('customer/delete/{id}', 'ClientsController@destroy');
-// ==========================Product Routs ========================================
+// ==========================Product Routs Mark ========================================
 Route::resource('products','ProductController');
+
+// ========================================================================
+// ==========================Return Invoices Routs Mark ========================================
+Route::resource('returnInvoices','ReturnInvoicesController');
 
 // ========================================================================
 

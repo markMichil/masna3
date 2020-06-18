@@ -22,9 +22,15 @@
 </li>
 <li>
     <a id="invoices" class="li" href="{{ url('invoices') }}">
-        <i class="fa fa-edit"></i> <span>الفواتير</span>
+        <i class="fa fa-edit"></i> <span>فواتير المشتريات</span>
     </a>
 </li>
+
+        <li style="background-color: red">
+            <a id="sinvoices" class="li" href="{{ url('returnInvoices') }}">
+                <i class="fa fa-edit"></i> <span> مرتجع  فواتير مشتريات</span>
+            </a>
+        </li>
 {{--<li>--}}
 {{--    <a id="expenses" class="li" href="{{ url('expenses') }}">--}}
 {{--        <i class="fa fa-bomb"></i> <span>مصروفات عامة</span>--}}
@@ -61,6 +67,16 @@
    </ul>
 </li>
 
+        <li class="list dropdown " style="background-color:red;">
+            <a id="sales" href="#">
+                <i class="fa fa-remove"></i> <span>مرتجع مبيعات </span>
+            </a>
+            <ul id="sales-ul" >
+                <li style="background-color:#c10303;"><a href="{{ url('return/cash') }}"><i class="fa fa-arrow-circle-left"></i> نقدي</a></li>
+                <li style="background-color:#c10303;"><a href="{{ url('return/order2') }}"><i class="fa fa-arrow-circle-left"></i> الاجل</a></li>
+            </ul>
+        </li>
+
 {{--<li class="list dropdown">--}}
 {{--    <a id="report" class="li" href="#">--}}
 {{--        <i class="fa fa-line-chart"></i> <span>التقارير</span>--}}
@@ -91,6 +107,12 @@
 {{--        <li><a href="{{ url('reportDaily/installment') }}"><i class="fa fa-arrow-circle-left"></i> المبيعات القسط</a></li>--}}
 {{--    </ul>--}}
 {{--</li>--}}
+
+        <li style="background-color:green;">
+            <a id="movment" class="li" href="{{ url('ItemMovment/products') }}">
+                <i class="fa fa-motorcycle"></i> <span>حركة الصنف</span>
+            </a>
+        </li>
 @endif
 </ul>
 </section>
