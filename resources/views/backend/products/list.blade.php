@@ -64,7 +64,7 @@
                                <?php echo '<br><img src="data:image/png;base64,' . DNS1D::getBarcodePNG($row->code, "c128",2,50) . '" alt="barcode"   />'; ?>
                                    <h2> {{$row->pro_code}}</h2>
                              </td>
-                          <td class='text-center'><img src="{{url($row->image)}}" style="width:70px;height:70px;border:1px solid #ddd"></td>
+                          <td class='text-center'><img src="" style="width:70px;height:70px;border:1px solid #ddd"></td>
                           <td class='text-center'>{{$row->name}}</td>
                           <td class='text-center'>
                               {{$row['factory']['name']}}

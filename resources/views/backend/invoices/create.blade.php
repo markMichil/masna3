@@ -18,13 +18,19 @@
  <p class="alert alert-danger">{{Session::get('error')}}</p>
 @endif
 
-      {!! Form::Open() !!}
+      <form>
+        
 
         <div class="col-md-12">
 
            <div class="col-md-4 col-md-offset-2 form-group">
-              <label>الأسم</label>
-              <input type="text" class="form-control" name="name" required>
+              <label>المصنع</label>
+              <select type="text" class="form-control" name="name" id="factory" required>
+        <option   disabled="" selected="selected"> اختر المصنع</option>              
+                  @foreach($data as $factory)
+        <option   value="{{$factory->id}}">{{$factory->name}}</option>              
+                @endforeach
+              </select>
            </div>
 
            <div class="col-md-4 form-group">
@@ -36,7 +42,8 @@
 
            <div class="col-md-2 form-group">
               <label>كود العباية</label>
-              <input type="text" class="form-control"  name="pro_code" required>
+              <input type="text" class="form-control   search"  name="pro_code" required>
+              <ul id="" class="list-group  html_product"  name='product_id[]'>  </ul>
            </div>
 
            <div class="col-md-2 form-group">
@@ -77,7 +84,8 @@
            </div>
         </div>
  
-    {!! Form::Close() !!}
+      </form>
+  
     </div>
 
       </div>
@@ -90,6 +98,7 @@
 @section('jsCode')
 
 <script>
+    var split = 'invoices';
 
 document.querySelector('.submit').addEventListener("click", function(){
     window.btn_clicked = true;
@@ -113,8 +122,48 @@ $('body').on('click', '.remove_attr', function () {
 
 $(document).ready(function(){
   $("#add_more").click(function(){
-     $(".append").append("<div><div class='col-md-12'><br/><hr><br/></div><div class='col-md-2 form-group'><label>كود العباية</label><input type='text' class='form-control' name='pro_codes[]'></div><div class='col-md-2 form-group'><label>السعر</label><input type='number' step='any' min='0' style='padding:1px;padding-right:10px;' class='form-control' name='prices[]'></div><div class='col-md-2 form-group'><label>الكمية</label><input type='number' step='any' class='form-control' min='0' style='padding:1px;padding-right:10px;' name='qtys[]'></div><div class='col-md-6 form-group'><label>الوصف</label><input type='text' class='form-control' name='contents[]' required></div><div class='col-md-12'><button class='btn btn-danger button remove_attr pull-right'><i class='fa fa-trash'></i> حذف العباية</button></div></div>");
+     $(".append").append("<div><div class='col-md-12'><br/><hr><br/></div><div class='col-md-2 form-group'><label>كود العباية</label><input type='text' class='form-control  search' name='pro_codes[]'><select  class='list-group  html_product'  name='product_id[]'>  </select></div><div class='col-md-2 form-group'><label>السعر</label><input type='number' step='any' min='0' style='padding:1px;padding-right:10px;' class='form-control' name='prices[]'></div><div class='col-md-2 form-group'><label>الكمية</label><input type='number' step='any' class='form-control' min='0' style='padding:1px;padding-right:10px;' name='qtys[]'></div><div class='col-md-6 form-group'><label>الوصف</label><input type='text' class='form-control' name='contents[]' required></div><div class='col-md-12'><button class='btn btn-danger button remove_attr pull-right'><i class='fa fa-trash'></i> حذف العباية</button></div></div>");
   });
+
+
+var factory_id = 0
+$("#factory").click(function(){
+ factory_id =  $(this).val();
+});
+
+function getProduct(data = ''){
+
+
+
+}
+
+
+$('.search').each(function (){
+ $(document).on('keyup','.search',function (){
+// alert(factory_id);
+var search = $(this).val();
+var data = {'search':search,'factory_id':factory_id  };
+// console.log(data);
+
+$.ajax({
+url:"{{url('invoices/create')}}",
+type :'GET',
+dataType:'json',
+data:{data:data},
+success:function(response){
+ // console.log(response);
+
+// $(document).on('change','.html_product',function (){
+  $('.html_product').html(response.html_product);
+// });
+}
+
+});
+
+   // getProduct(data);
+
+});
+});
 });
 
 $("#inv_paid").change(function(){
@@ -122,7 +171,10 @@ $("#inv_paid").change(function(){
   var paid = $("#inv_paid").val();
   var remain = total-paid;
   $("#inv_remain").val(remain);
-})
+});
+
+
+
 </script>
 
 @stop

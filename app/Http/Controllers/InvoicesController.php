@@ -1,10 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\factory;
+use App\product;
 
 use App\invoices;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Input;
 
+use Session;
+use Redirect;
 class InvoicesController extends Controller
 {
     /**
@@ -14,7 +20,12 @@ class InvoicesController extends Controller
      */
     public function index()
     {
-        //
+        
+$data = product::with('factory')->get();
+
+        return view('backend.invoices.list')
+           ->with('data',$data);
+
     }
 
     /**
@@ -22,10 +33,59 @@ class InvoicesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+$data = factory::get();
+$this->get_products();
+return view('backend.invoices.create')
+->with('data',$data);
+
+}
+
+private function factories(){
+$factories = factory::all();
+return $factories;
+}
+
+// ===================================
+public function get_products(){
+if(request()->ajax()){ 
+$data = request()->get('data');
+$factory_id = $data['factory_id'];
+$search = $data['search'];
+// if($data != ''){
+$product = product::where('name','LIKE','%'.$search.'%')->where('factories_id','=',$factory_id)->get();
+$html_product='';
+if( $product->count()> 0 ){
+
+            foreach ($product as $value)
+            {
+            $product_id = $value['id'];
+            $name = $value['name'];
+            $html_product .= "
+            <li class='list-group-item' > <input type='hidden'  name='product_id' value=$product_id> $name</li>
+            ";    
+            }
+
+    }else {
+            $html_product = "
+            <li class='list-group-item'>  لا يوجد منتج بهذا الاسم </li>
+            ";
+
     }
+
+// }
+ 
+  $data_array = array('html_product'=>$html_product);
+
+  // echo  response(['response'=>$data_array]);
+    echo   json_encode($data_array);
+    exit();
+    // return view('backend.invoices.create')->with('all',$all);
+}
+}
+
+
 
     /**
      * Store a newly created resource in storage.
