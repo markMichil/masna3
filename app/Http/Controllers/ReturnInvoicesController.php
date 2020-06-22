@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\factory;
+use App\product;
 use App\return_invoices;
+use App\return_invoice_details;
+use App\cart_return_invoice;
 use Illuminate\Http\Request;
+
 
 class ReturnInvoicesController extends Controller
 {
@@ -15,7 +19,10 @@ class ReturnInvoicesController extends Controller
      */
     public function index()
     {
-        $data = return_invoices::all();
+
+        $data = return_invoices::with('factory')
+            ->with('return_invoice_details')
+            ->get();
 
         return view('backend.returnInvoices.list')->with('data',$data) ;
     }
@@ -27,9 +34,13 @@ class ReturnInvoicesController extends Controller
      */
     public function create()
     {
+        $data = cart_return_invoice::with('product')->with('factory')->get();
+
         $factories = factory::all();
 
-        return view('backend.returnInvoices.create')->with('factories',$factories) ;
+        return view('backend.returnInvoices.create')
+            ->with('data',$data)
+            ->with('factories',$factories) ;
     }
 
     /**
@@ -179,4 +190,140 @@ class ReturnInvoicesController extends Controller
     {
         //
     }
+
+
+    #Search
+    public function search_pro(Request $request)
+    {
+
+        $procode = $request->input('val');
+        $factoryId = $request->input('fac');
+
+        if(Product::where('code',$procode)->where('factories_id',$factoryId)->count() > 0 )
+        {
+            $pro = Product::where('code',$procode)->where('factories_id',$factoryId)->first();
+            return \Response::json([
+                'state'=>true,
+
+                'procode' => $pro->code,
+                'id' => $pro->id,
+                'image' => url($pro->image),
+                'proname' => $pro->name,
+                'price' => $pro->price,
+                'price_d' => $pro->price_D,
+                'qty' => $pro->quantity
+            ]);
+        } else
+            return \Response::json(['state'=>false,'msg'=>'المصنع خطا او كود العباية غير موافق للمصنع']);
+    }
+
+    #Add To Cart
+    public function add_to_cart(Request $request)
+    {
+        $product = product::find($request->product_id);
+//        dd($product);
+        $row = new cart_return_invoice();
+        $row->products_id = $product->id;
+        $row->factories_id = $product->factories_id;
+        $row->quantity = 1;
+        $row->price = $product->price;
+        $row->price_d = $product->price_D;
+
+
+        try
+        {
+            $row->save();
+            \Session::flash('success','تم إضافة العبايات بنجاح');
+        }catch(\Exception $e) {
+            \Session::flash('error','لم يتم إضافة العبايات');
+        }
+        return \Redirect::back();
+    }
+
+    #Update Qty
+    public function update_qty($id,$value, Request $request)
+    {
+
+        $cart = cart_return_invoice::find($id);
+        $cart->quantity = $value;
+
+        try{
+            $cart->save();
+            \Session::flash('success','تم تعديل المبيعات بنجاح');
+        }catch(\Exception $e){
+            \Session::flash('error','لم يتم تعديل المبيعات');
+        }
+    }
+
+    public function update_qty_update($id,$value, Request $request)
+    {
+
+        $cash = Cash_other::find($id);
+        $pro = Product::where('pro_code',$cash->pro_code)->first();
+
+        if($value > $cash->qty) {
+            $new_qty = $value - $cash->qty;
+            $pro->qty = $pro->qty - $new_qty;
+        } else {
+            $new_qty = $cash->qty - $value;
+            $pro->qty = $pro->qty + $new_qty;
+        }
+        $pro->save();
+        $cash->qty = $value;
+        try{
+            $cash->save();
+            Session::flash('success','تم تعديل العبايات  بنجاح');
+        }catch(\Exception $e){
+            Session::flash('error','لم يتم تعديل العبايات');
+        }
+    }
+
+
+    # Calc Total Cart
+    public function calc_total_cart()
+    {
+
+        $cashs = cart_return_invoice::get();
+
+        $total = 0;
+        $i = 0;
+        foreach($cashs as $cash){
+
+            if($cash->price_d != null && $cash->price_d >0){
+                $i++;
+                $total += $cash->price_d*$cash->quantity;
+            }else{
+                $total += $cash->price*$cash->quantity;
+            }
+
+        }
+
+        return \Response::json([
+            'state'=>true,
+            'total' => $total,
+            'discount' => $i,
+        ]);
+    }
+
+
+    public function calc_total_cart_update($id)
+    {
+        $cashs = Cash::where('id',$id)->first();
+        $total = 0;
+        foreach(json_decode($cashs->cash_id) as $cash){
+            $pro = Cash_other::where('id',$cash)->first();
+            $total += $pro->price*$pro->qty;
+        }
+
+        return Response::json([
+            'state'=>true,
+            'total' => $total,
+        ]);
+    }
+
+
+
+
+
+
 }

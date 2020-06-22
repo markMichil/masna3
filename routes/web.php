@@ -41,6 +41,11 @@ Route::resource('products','ProductController');
 
 // ========================================================================
 // ==========================Return Invoices Routs Mark ========================================
+Route::get('returnInvoices/search-pro','ReturnInvoicesController@search_pro');
+Route::post('returnInvoices/add_to_cart','ReturnInvoicesController@add_to_cart');
+Route::get('returnInvoices/update-qty/{id}/{value}','ReturnInvoicesController@update_qty');
+Route::post('returnInvoices/calc-total-cart','ReturnInvoicesController@calc_total_cart');
+
 Route::resource('returnInvoices','ReturnInvoicesController');
 
 // ========================================================================
