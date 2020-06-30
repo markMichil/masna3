@@ -54,13 +54,15 @@
                             <p style='color:red;font-size:11px;'>الكمية المتاحة {{$key['product']->quantity}} فقط</p>
                           </td>
                           @if($key->price_d != null && $key->price_d > 0)
-                              <td class="text-center" id="total_price_d{{$key->id}}">{{$key->price_d*$key->quantity}}</td>
+
+                              <td class="text-center" id="total_price_d_{{$key->id}}">{{$key->price_d*$key->quantity}}</td>
                               @else
-                              <td class="text-center" id="total_price{{$key->id}}">{{$key->price*$key->quantity}}</td>
+
+                              <td class="text-center" id="total_price_{{$key->id}}">{{$key->price*$key->quantity}}</td>
                               @endif
 
                           <td class='text-center'>
-                              {!! Form::Open(['url'=>'sales/cash/remove-cart/'.$key->id]) !!}
+                              {!! Form::Open(['url'=>'returnInvoices/remove-cart/'.$key->id]) !!}
                                  <button class="btn btn-danger"><i class="fa fa-trash"></i> حذف</button>
                               {!! Form::Close() !!}
                           </td>
@@ -155,24 +157,8 @@
       
       <div class="panel-body">
 
-      {!! Form::Open() !!}
-
-        <div class="col-md-12">
-           <div class="col-md-4 col-md-offset-2 form-group">
-              <label>الأسم</label>
-              <input type="text" class="form-control" name="name" required>
-           </div>
-
-           <div class="col-md-4 form-group">
-              <label>رقم الهاتف</label>
-              <input type="number" class="form-control" name="phone">
-           </div>
-
-
-        </div>  
-
-
-
+          <form role="form" action="{{route('returnInvoices.store')}}" method="post" enctype="multipart/form-data">
+              @csrf
         <div class="col-md-12" style="margin-top:20px;">
 
            <div class="col-md-4 form-group">
@@ -181,20 +167,15 @@
            </div>
 
            <div class="col-md-4 form-group">
-              <label>الخصم</label>
-              <input type="number" step="any" id="discount" min="0" style="padding:1px;padding-right:10px;" onkeyup="calc_remain();"  class="form-control" name="discount" required>
+              <label>المدفوع </label>
+              <input type="number" step="any" id="discount" min="0" style="padding:1px;padding-right:10px;" onkeyup="calc_remain();"  class="form-control" name="paid" required>
            </div>
 
            <div class="col-md-4 form-group">
-              <label>الإجمالي بعد الخصم</label>
-              <input type="number" id="after_dis" step="any" style="padding:1px;padding-right:10px;" class="form-control" name="total_after_dis" required>
+              <label>المتبقى</label>
+              <input type="number" id="after_dis" step="any" style="padding:1px;padding-right:10px;" class="form-control" name="remain" required>
            </div>
 
-
-           <div class="col-md-12 form-group">
-              <label>ملاحظات مع الفاتورة</label>
-              <textarea name="note" rows="5" class="form-control"></textarea>
-           </div>
 
         </div>  
 
@@ -203,7 +184,7 @@
 		  <a href="{{ url('sales/cash') }}" class="btn btn-danger"> رجوع <i class="fa fa-undo"></i></a>
         </div>
 
-    {!! Form::Close() !!}
+          </form>
     </div>
 
      </div>
@@ -327,8 +308,10 @@ function calc_remain(){
 
 
 @foreach($data as $jscode)
+
 {{--   @foreach(App\Product::where('id',$jscode->products_id)->get() as $jsfun)--}}
 <script>
+
 $(document).ready(function(){
    var unit_price = $("#unit_price_{{$jscode ->id}}").text();
    var qty = $("#qty_{{$jscode ->id}}").val();
@@ -336,16 +319,23 @@ $(document).ready(function(){
 });
 
 function submit_qty_{{$jscode->id}}(id){
-    {{--console.log({{$jscode->id}});--}}
-  $("#total_amount").css({"display":"none"});
-  var unit_price = $("#unit_price_{{$jscode->id}}").text();
-  var unit_price_d = $("#unit_price_{{$jscode->id}}").text();
-    // console.log(unit_price);
-  var qty = $("#qty_{{$jscode->id}}").val();
-    // console.log(qty);
 
-  $("#total_price_{{$jscode->id}}").text(unit_price*qty);
-    // console.log(unit_price*qty);
+  $("#total_amount").css({"display":"none"});
+
+
+    @if($jscode['product']->price_D != null)
+    console.log('havepriceD');
+    var unit_price = $("#unit_price_d_{{$jscode->id}}").text();
+    var qty = $("#qty_{{$jscode->id}}").val();
+    $("#total_price_d_{{$jscode->id}}").text(unit_price*qty);
+    @else
+    console.log('NohavepriceD');
+    var unit_price = $("#unit_price_{{$jscode->id}}").text();
+    var qty = $("#qty_{{$jscode->id}}").val();
+    $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+        @endif
+
+
   var value = $("#qty_{{$jscode->id}}").val();
   var Url = "{{ url('returnInvoices/update-qty/') }}/"+id+'/'+value+'';
 
@@ -360,6 +350,7 @@ function submit_qty_{{$jscode->id}}(id){
         type : "GET",
         dataType : "json",
         success : function(data){
+            console.log(data);
         }
     });
 return false;

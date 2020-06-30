@@ -324,6 +324,54 @@ class ReturnInvoicesController extends Controller
 
 
 
+    # Remove Form Cart
+    public function remove_from_cart($id)
+    {
+        $cart = cart_return_invoice::find($id);
+
+
+
+//        $cash = Return_cash_other::find($id);
+        if(!$cart) {
+            return \Redirect::back();}
+        try{
+            $cart->delete();
+            \Session::flash('success','تم حذف المرتجع بنجاح');
+        } catch(\Exception $e) {
+            \Session::flash('error','لم يتم حذف المرتجع');
+        }
+        return \Redirect::back();
+    }
+
+    public function remove_from_cart_update($id,$getid)
+    {
+        $cash = Return_cash_other::find($id);
+        if(!$cash) {
+            return Redirect::back();}
+        try{
+            $pro = Product::where('pro_code',$cash->pro_code)->first();
+            $pro->qty = $pro->qty - $cash->qty;
+            $pro->save();
+            $cash->delete();
+
+            // remove from table json
+            $app = Return_cashes::find($getid);
+            $decoded = json_decode($app->cash_id, true);
+            if(($key = array_search($id, $decoded)) !== false) {
+                unset($decoded[$key]);
+            }
+            $app->cash_id = json_encode($decoded);
+            $app->save();
+            Session::flash('success','تم حذف المرتجع بنجاح');
+        } catch(\Exception $e) {
+            Session::flash('error','لم يتم حذف المرتجع');
+        }
+        return Redirect::back();
+    }
+
+
+
+
 
 
 }
