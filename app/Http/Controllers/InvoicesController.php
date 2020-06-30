@@ -249,15 +249,13 @@ public function save_invoice(Request $request){
     {
         // dd($request->all());
 
-$isExits = cart::where('products_id','=',$request->product_id)->exists() ;
-if( $isExits == true){
- \Session::flash('error','هذا المنتج موجود بالفعل ');
-        return \Redirect::back();
+    $isExits = cart::where('products_id','=',$request->product_id)->exists() ;
+    if( $isExits == true){
+     \Session::flash('error','هذا المنتج موجود بالفعل ');
+            return \Redirect::back();
 
-}else{
-
-}
-        $product = product::find($request->product_id);
+    }
+            $product = product::find($request->product_id);
 
 //        dd($product);
         $row = new cart();

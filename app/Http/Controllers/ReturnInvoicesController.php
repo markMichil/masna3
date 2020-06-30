@@ -51,13 +51,65 @@ class ReturnInvoicesController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        $carts = cart_return_invoice::get();
 
-        $factories_id   = $request->factories_id;
-        $code           = $request->code;
-        $price          = $request->price;
-        $price_d        = $request->price_d;
-        $quantity       = $request->quantity;
+        $factories_id = $carts[0]['factories_id'];
+
+
+
+
+        $total = $request->total;
+        $paid = $request->paid;
+        $remain = $request->remain;
+        $type_buy = 1;
+        $done = 0;
+
+                $return_Invoice = new return_invoices();
+        $return_Invoice['factories_id'] = $factories_id;
+        $return_Invoice['total_price'] = $total;
+        $return_Invoice['paid'] = $paid;
+        $return_Invoice['remains'] = $remain;
+        $return_Invoice['type_buy'] = $type_buy;
+        $return_Invoice['done'] = $done;
+        $return_Invoice->save();
+
+
+         foreach ($carts as $cart)
+        {
+            $cart_return_invoice = new return_invoice_details();
+            $cart_return_invoice['return_invoices_id'] = $return_Invoice->id;
+            $cart_return_invoice['products_id'] = $cart['products_id'];
+
+            $cart_return_invoice['quantity'] = $cart['quantity'];
+            $cart_return_invoice['price'] = $cart['price'];
+            $cart_return_invoice['price_d'] = $cart['price_d'];
+             $cart_return_invoice->save();
+
+        }
+
+
+        try {
+            cart_return_invoice::truncate();
+                \Session::flash('success','تم حفظ الفاتورة بنجاح');
+            return \Redirect::to('returnInvoices');
+        }catch (\Exception $e){
+
+             \Session::flash('error','لم يتم حفظ الفاتورة كود المنتج غير صحيح ');
+            return \Redirect::back();
+
+        }
+
+
+
+
+
+
+
+//        $factories_id   = $request->factories_id;
+//        $code           = $request->code;
+//        $price          = $request->price;
+//        $price_d        = $request->price_d;
+//        $quantity       = $request->quantity;
 
 
 
@@ -220,6 +272,16 @@ class ReturnInvoicesController extends Controller
     #Add To Cart
     public function add_to_cart(Request $request)
     {
+
+        $isExits = cart_return_invoice::where('products_id','=',$request->product_id)->exists() ;
+        if( $isExits == true){
+            \Session::flash('error','هذا المنتج موجود بالفعل ');
+            return \Redirect::back();
+
+        }
+
+
+
         $product = product::find($request->product_id);
 //        dd($product);
         $row = new cart_return_invoice();
