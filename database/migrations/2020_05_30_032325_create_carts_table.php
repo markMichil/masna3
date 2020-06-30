@@ -27,6 +27,8 @@ class CreateCartsTable extends Migration
             $table->double('price');
             $table->double('sell');
 
+           $table->double('price_D')->nullable();
+            $table->double('sell_D')->nullable();
 
             $table->timestamps();
         });
