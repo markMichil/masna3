@@ -50,7 +50,17 @@ Route::resource('returnInvoices','ReturnInvoicesController');
 
 // ========================================================================
 // ==========================Invoice Routs==============================================
+
+Route::get('returnInvoices/search-pro','InvoicesController@search_pro');
+Route::post('returnInvoices/add_to_cart','InvoicesController@add_to_cart');
+Route::get('returnInvoices/update-qty/{id}/{value}','InvoicesController@update_qty');
+Route::post('invoices/calc-total-cart','InvoicesController@calc_total_cart');
+Route::post('invoices/remove-cart/{id}','InvoicesController@deleteFromCart');
+Route::post('invoices/create','InvoicesController@save_invoice');
+
+
 Route::resource('invoices','InvoicesController');
+
 // Route::get('invoices/getProduct','InvoicesController@get_products');
 // Route::post('invoices/create','InvoicesController@get_products');
 
