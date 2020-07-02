@@ -45,27 +45,28 @@
                <?php $i = 0 ?>
                @if($data !='')
                   @foreach($data as $key)
-
                       <tr>
                           <td class='text-center'>{{++$i}}</td>
                           <td class='text-center'> <input type="hidden" class="factory_id" name="factory_id" value="{{$key['factory']->id ? $key['factory']->id : 0 }}"> {{$key['factory']->name}}</td>
                           <td class='text-center  code_product'>{{$key['product']->code}}</td>
                           <td class='text-center' id="unit_price_{{$key->id}}">{{$key->price}}</td>
   <td class='text-center'>
-                            <input type="number" step="any" min="0" onchange="submit_qty_{{$key->id}}({{$key->id}});" id="qty_{{$key->id}}" style="width:70px;padding:3px;" max="{{$key['product']->quantity}}" value="{{$key->quantity}}">
-                            <p style='color:red;font-size:11px;'>الكمية المتاحة {{$key['product']->quantity}} فقط</p>
+                            <input type="number" step="any" min="0" onchange="submit_qty_{{$key->id}} ({{$key->id}});" id="qty_{{$key->id}}" style="width:70px;padding:3px;" max="{{$key['product']->quantity}}" value="{{$key->quantity}}">
+                            <p style='color:red;font-size:11px;'>الكمية المتاحة {{$key->quantity}} فقط</p>
+
                           </td>
 
-                          <td class='text-center' id="unit_price_d_{{$key->id}}"><input type="number" id="price_D_{{$key->id}}" name="sell" min='0' max="{{$key['product']->price}}" style="width:70px;padding:3px;" value="0"> </td>
+                          <td class='text-center' id="unit_price_d_{{$key->id}}">
+                            <input type="number" id="price_D_{{$key->id}}" name="price_D" min='0' max="{{$key->price}}" style="width:70px;padding:3px;" value="{{$key->price_D ?  $key->price_D : 0}}"> </td>
                           <td class='text-center' id="">{{$key->sell}}</td>
 <td class='text-center' id="unit_price_d_{{$key->id}}"><input type="number" id="sell_{{$key->id}}" name="sell" min='0' max="{{$key['product']->price}}" style="width:70px;padding:3px;" value="0"> </td>
 
                         
-                          @if($key->price_d != null && $key->price_d > 0)
-                              <td class="text-center" id="total_price_d{{$key->id}}">{{$key->price_d*$key->quantity}}</td>
-                              @else
-                              <td class="text-center" id="total_price{{$key->id}}">{{$key->price*$key->quantity}}</td>
-                              @endif
+                     
+
+
+                              <td class="text-center" id="total_price_{{$key->id}}"></td>
+                        
 
                           <td class='text-center'>
                               {!! Form::Open(['url'=>'invoices/remove-cart/'.$key->id]) !!}
@@ -140,7 +141,7 @@
                     <p>السعر <span  id="search_price"></span> <span style='font-size:11px;'>جنيه</span></p>
                     <p> الخصم  <span  id="search_price_d"></span> <span style='font-size:11px;'>جنيه</span></p>
                     <p><label class="label label-success"> الكمية <span id="search_qty"></span></label><input id="just_qty" readonly type='hidden' name='sub_qty'></p>
-                  {!! Form::Open(['url'=>'returnInvoices/add_to_cart']) !!}
+                  {!! Form::Open(['url'=>'Invoices/add_to_cart']) !!}
                      <input type='hidden' name='product_id' id="search_procode">
 
                     <p><button class="btn btn-danger"><i class="fa fa-plus-circle"></i> أضف الي  المرتجع</button></p>
@@ -174,7 +175,8 @@
 
            <div class="col-md-4 form-group">
               <label>المدفوع</label>
-              <input type="number" step="any" id="totals" min="0"  style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
+              <input type="hidden" step="any" id="totalsH" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
+              <input type="number" step="any" id="totals" min="0"  style="padding:1px;padding-right:10px;" class="form-control"  required>
            </div>
 
            <div class="col-md-4 form-group">
@@ -234,7 +236,8 @@ $.ajax({
                  $("#total_amount").text(data.total+' جنيه');
                  $("#total_invioce").val(data.total);
                  $("#totals").val(data.total);
-                 // $("#totals").attr('disabled','disabled');
+                 $("#totals").attr('disabled','disabled');
+                 $("#totalsH").val(data.total);
 
 //                 $("#totals").placeholder(data.total);
             }
@@ -248,7 +251,6 @@ $.ajax({
 
 
   var    factory_id = $('.factory_id').val();
-  alert(factory_id);
  if( factory_id === undefined  || factory_id === ''   ){
 
  } else{
@@ -262,7 +264,7 @@ $("#factory").attr('disabled','disabled');
 $('#search_btn').on('click', function(){
 // $(".code_product")
 
-   var Url = '{{ url("returnInvoices/search-pro") }}';
+   var Url = '{{ url("Invoices/search-pro") }}';
    var val = $("#pro_code").val();
    var fac = $("#factory").val();
 
@@ -373,18 +375,51 @@ $(document).ready(function(){
 });
 
 function submit_qty_{{$jscode->id}}(id){
-    {{--console.log({{$jscode->id}});--}}
-  $("#total_amount").css({"display":"none"});
-  var unit_price = $("#unit_price_{{$jscode->id}}").text();
-  var unit_price_d = $("#unit_price_{{$jscode->id}}").text();
-    // console.log(unit_price);
-  var qty = $("#qty_{{$jscode->id}}").val();
-    // console.log(qty);
 
-  $("#total_price_{{$jscode->id}}").text(unit_price*qty);
-    // console.log(unit_price*qty);
+  // console.log('havepriceD');
+
+  // alert(id);
+  $("#total_amount").css({"display":"none"});
+
+if($("#price_D_{{$jscode->id}}").val() !=0 || $("#price_D_{{$jscode->id}}").val() != ''){
+
+   var unit_price = $("#price_D_{{$jscode->id}}").val();
+
+    var qty = $("#qty_{{$jscode->id}}").val();
+    // alert(unit_price);
+if(unit_price == 0){
+  var _price = $("#unit_price_{{$jscode->id}}").text();
+
+    var allTotal= _price*qty;
+
+} else{
+    var allTotal= unit_price*qty;
+
+}
+    $("#total_price_{{$jscode->id}}").text(allTotal);
+} else{
+  var unit_price = $("#unit_price_{{$jscode->id}}").text();
+    var qty = $("#qty_{{$jscode->id}}").val();
+    $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+}
+
+
+    // @if($jscode['product']->price_D != null)
+
+
+    // var unit_price = $("#price_D_{{$jscode->id}}").val();
+    // // alert(unit_price);
+    // var qty = $("#qty_{{$jscode->id}}").val();
+    // $("#total_price_d_{{$jscode->id}}").text(unit_price*qty);
+    // @else
+    // var unit_price = $("#unit_price_{{$jscode->id}}").text();
+    // var qty = $("#qty_{{$jscode->id}}").val();
+    // $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+    //     @endif
+
+// alert(1111);
   var value = $("#qty_{{$jscode->id}}").val();
-  var Url = "{{ url('returnInvoices/update-qty/') }}/"+id+'/'+value+'';
+  var Url = "{{ url('Invoices/update-qty/') }}/"+id+'/'+value+'';
 
   $.ajaxSetup({
       headers: {
@@ -397,10 +432,97 @@ function submit_qty_{{$jscode->id}}(id){
         type : "GET",
         dataType : "json",
         success : function(data){
+            console.log(data);
+        }
+    });
+// return false; 
+}
+
+
+
+$("#price_D_{{$jscode->id}}").change(function(){
+var id = {{$jscode->id}};
+// alert(id);
+  var unit_price = $("#price_D_{{$jscode->id}}").val();
+
+    var qty = $("#qty_{{$jscode->id}}").val();
+    // alert(qty);
+    // alert(unit_price);
+
+    if(unit_price == 0){
+  var _price = $("#unit_price_{{$jscode->id}}").text();
+
+    var allTotal= _price*qty;
+
+} else{
+    var allTotal= unit_price*qty;
+
+}
+
+    $("#total_price_{{$jscode->id}}").text(allTotal);
+
+
+  var value = qty; 
+
+  // alert(value);
+  var Url = "{{ url('Invoices/update_price_D/') }}/"+id+'/'+value+'/'+unit_price;
+// alert(Url);
+  $.ajaxSetup({
+      headers: {
+         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  });
+
+  $.ajax({
+        url : Url,
+        type : "GET",
+        dataType : "json",
+        success : function(data){
+            console.log(data);
+        }
+    });
+});
+
+function submit_price_D_{{$jscode->id}}(id){
+
+
+
+
+
+    // @if($jscode['product']->price_D != null)
+
+    var unit_price = $("#price_D_{{$jscode->id}}").val();
+
+    var qty = $("#qty_{{$jscode->id}}").val();
+    // alert(qty);
+    $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+    // @else
+    // var unit_price = $("#unit_price_{{$jscode->id}}").text();
+    // var qty = $("#qty_{{$jscode->id}}").val();
+    // $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+    //     @endif
+
+// alert(1111);
+  var value = $("#price_D_{{$jscode->id}}").val();
+  // alert(value);
+  var Url = "{{ url('Invoices/update_price_D/') }}/"+id+'/'+value+'';
+
+  $.ajaxSetup({
+      headers: {
+         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  });
+
+  $.ajax({
+        url : Url,
+        type : "GET",
+        dataType : "json",
+        success : function(data){
+            console.log(data);
         }
     });
 return false;
-};
+}
 
 </script>
 {{--   @endforeach--}}

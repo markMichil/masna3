@@ -56,6 +56,9 @@ class InvoicesController extends Controller
 public function save_invoice(Request $request){
         dd($request->all());
 
+         $total   = $request->total;
+         $discount   = $request->discount;
+         $total_after_dis   = $request->total_after_dis;
          $factory_id   = $request->factory_id;
       
 
@@ -63,7 +66,7 @@ public function save_invoice(Request $request){
 
         foreach($carts as $cart){
             dump($cart);
-            $factories_id   = $cart->factories_id;
+            
           $products_id           = $cart->products_id;
       echo  $price          = $cart->price;
         // $sell         = $cart->sell ;
@@ -218,6 +221,7 @@ public function save_invoice(Request $request){
         //
     }
 
+/**************************************************************************************/
 
     #Search
     public function search_pro(Request $request)
@@ -278,6 +282,7 @@ if( $isExits == true){
         }
         return \Redirect::back();
     }
+/**************************************************************************************/
 
     #Update Qty
     public function update_qty($id,$value, Request $request)
@@ -293,6 +298,25 @@ if( $isExits == true){
             \Session::flash('error','لم يتم تعديل المبيعات');
         }
     }
+
+/**************************************************************************************/
+      public function update_price_D($id,$value,$price_D, Request $request)
+    {
+        $cart = cart::find($id);
+
+        $cart->price_D = $price_D;
+        $cart->quantity = $value;
+// dd($cart);
+        try{
+            $cart->save();
+
+            
+            \Session::flash('success','تم تعديل المبيعات بنجاح');
+        }catch(\Exception $e){
+            \Session::flash('error','لم يتم تعديل المبيعات');
+        }
+    }
+/**************************************************************************************/
 
     public function update_qty_update($id,$value, Request $request)
     {
