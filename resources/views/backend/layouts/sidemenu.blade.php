@@ -109,7 +109,7 @@
 {{--</li>--}}
 
         <li style="background-color:green;">
-            <a id="movment" class="li" href="{{ url('ItemMovment/products') }}">
+            <a id="movment" class="li" href="{{ url('ItemMovement') }}">
                 <i class="fa fa-motorcycle"></i> <span>حركة الصنف</span>
             </a>
         </li>
