@@ -20,4 +20,8 @@ class product extends Model
     {
         return $this->hasMany('App\cart_return_invoices','products_id','id');
     }
+    public function movements()
+    {
+        return $this->hasMany('App\movements','products_id','id');
+    }
 }

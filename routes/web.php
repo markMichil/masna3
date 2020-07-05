@@ -39,6 +39,9 @@ Route::get('customer/delete/{id}', 'ClientsController@destroy');
 // ==========================Product Routs ========================================
 Route::resource('products','ProductController');
 
+// ==========================Item Movment Routs ========================================
+Route::resource('ItemMovement','MovementsController');
+
 
 // ==========================Return Invoices Routs Mark ========================================
 Route::get('returnInvoices/search-pro','ReturnInvoicesController@search_pro');
