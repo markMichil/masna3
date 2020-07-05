@@ -103,7 +103,7 @@ public function save_invoice(Request $request){
 
         $Product = product::find($products_id);  
         $add_qty = $Product->quantity + $quantity;
-        $Product = product::where('id','=',$products_id)->update(['quantity' => $add_qty]);
+        $Product = product::where('id','=',$products_id)->update(['quantity' => $add_qty,'price_D'=>$price_D]);
 
 
 $reasonString = 'فاتورة رقم';
@@ -119,10 +119,22 @@ $reasonString = 'فاتورة رقم';
 // dd($add_qty);      
 
   }
+    
+ try {
+            cart::truncate();
+                \Session::flash('success','تم حفظ الفاتورة بنجاح');
+            return \Redirect::to('invoices');
+        }catch (\Exception $e){
+
+             \Session::flash('error','لم يتم حفظ الفاتورة كود المنتج غير صحيح ');
+            return \Redirect::back();
+
+        }
+
         // 
         // dd($quantity);
 
-return 'sucess';
+
 
 }
 
