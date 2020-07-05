@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\movements;
 use App\product;
+use Session;
+use Redirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 class MovementsController extends Controller
@@ -15,109 +17,44 @@ class MovementsController extends Controller
      */
     public function index(Request $request)
     {
-//        if(!empty($pro_code)){
-//            dd($request->all());
-//            $product = Product::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])->
-//            where('code',$pro_code)->first();
-//
-//            if($product){
-////                dd($product);
-//                $pro = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('code',$pro_code)->get();
-//                if(!empty($product))
-//                    $name= $product->slug;
-//                $Quantaty = $product->qty;
-//
-//
-//                $totalBuy = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',1)->get()->sum('qty');
-//
-//                $totalBuyMoney = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',1)->get()->sum('price');
-//
-//                $totalBuyReturn = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',2)->get()->sum('qty');
-//
-//
-//                $totalBuyReturnMoney = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',2)->get()->sum('price');
-//
-//                $totalSell = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',3)->get()->sum('qty');
-//
-//                $totalSellMoney = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',3)->get()->sum('sell');
-//
-//                $totalSellReturn = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',4)->get()->sum('qty');
-//
-//                $totalSellReturnMoney = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',4)->get()->sum('sell');
-//
-//                $totalSellOrder = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',5)->get()->sum('qty');
-//
-//                $totalSellMoneyOrder = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',5)->get()->sum('sell');
-//
-//                $totalSellOrderReturn = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])->
-//                where('pro_code',$pro_code)->where('type_go',6)->get()->sum('qty');
-//
-//                $totalSellOrderReturnMoney = item_movement::whereBetween('created_at',[$from." 00:00:00",$to." 00:00:00"])
-//                    ->where('pro_code',$pro_code)->where('type_go',6)->get()->sum('sell');
-//
-//            }
-//
-//
-//        }
-
-
-
-
-
-
-        $from_month = $request->from_month;
-        $from_year = $request->from_year;
-        $to_month = $request->to_month;
-        $to_year = $request->to_year;
+        $from_month     = $request->from_month;
+        $from_year      = $request->from_year;
+        $to_month       = $request->to_month;
+        $to_year        = $request->to_year;
 
         if($from_month == 'all'){
             $from_month = '01';
-        }if($to_month == 'all'){
+        }
+        if($to_month == 'all'){
         $to_month = '12';
     }
-        $from = '1-'.$from_month.'-'.$from_year;
-        $from = $from_year.'-'.$from_month.'-01';
-        $to = $to_year.'-'.$to_month.'-01';
-        $from.=" 00:00:00";
-        $to.=" 00:00:00";
 
-        $pro_code = $request->pro_code;
+        $from       = $from_year.'-'.$from_month.'-01';
+        $to         = $to_year.'-'.$to_month.'-01';
+        $from       .=" 00:00:00";
+        $to         .=" 00:00:00";
 
-        $name = '';
-        $pro = array();
+        $pro_code    = $request->pro_code;
 
-        $totalBuy = 0;
-        $totalBuyMoney = 0;
+        $name        = '';
+        $Quantaty    = 0;
 
-        $totalBuyReturn = 0;
-        $totalBuyReturnMoney = 0;
+        $product     = array();
 
-        $totalSell = 0;
-        $totalSellMoney = 0;
 
-        $totalSellReturn = 0;
-        $totalSellReturnMoney = 0;
+        $buy                =   0;
+        $sell               =   0;
+        $returnBuy          =   0;
+        $returnSell         =   0;
 
-        $totalSellOrder = 0;
-        $totalSellMoneyOrder = 0;
+        $buyProduct         =   0;
+        $sellProduct        =   0;
+        $returnBuyProduct   =   0;
+        $returnSellProduct  =   0;
 
-        $totalSellOrderReturn = 0;
-        $totalSellOrderReturnMoney = 0;
 
-        $Quantaty = 0;
 
-        $product = array();
+
         if(!empty($pro_code)){
 
             $product = product::where('code',$pro_code)
@@ -128,33 +65,34 @@ class MovementsController extends Controller
                 }])
                 ->first();
 
-//
+            if($product){
+                $Quantaty = $product->quantity;
+                $name = $product->name;
+            }
+
+            else{
+                Session::flash('error','كود العباية خطأ او المدة غير صحيحة اعد الادخال');
+                return Redirect::back();
+            }
+
 
         }
 
 
-
-
-
         return view('backend.itemMovement.products')
-            ->with('tb',$totalBuy)
-            ->with('tbm',$totalBuyMoney)
 
-            ->with('tbr',$totalBuyReturn)
-            ->with('tbrm',$totalBuyReturnMoney)
+            ->with('buyProduct',$buyProduct)
+            ->with('buy',$buy)
 
-            ->with('ts',$totalSell)
-            ->with('tsm',$totalSellMoney)
+            ->with('returnBuyProduct',$returnBuyProduct)
+            ->with('returnBuy',$returnBuy)
 
-            ->with('tsr',$totalSellReturn)
-            ->with('tsrm',$totalSellReturnMoney)
+            ->with('sell',$sell)
+            ->with('sellProduct',$sellProduct)
 
 
-            ->with('tso',$totalSellOrder)
-            ->with('tsmo',$totalSellMoneyOrder)
-
-            ->with('tsor',$totalSellOrderReturn)
-            ->with('tsorm',$totalSellOrderReturnMoney)
+            ->with('returnSellProduct',$returnSellProduct)
+            ->with('returnSell',$returnSell)
 
             ->with('name',$name)
             ->with('qty',$Quantaty)
