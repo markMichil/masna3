@@ -39,22 +39,23 @@ Route::get('customer/delete/{id}', 'ClientsController@destroy');
 // ==========================Product Routs ========================================
 Route::resource('products','ProductController');
 
-// ========================================================================
+
 // ==========================Return Invoices Routs Mark ========================================
 Route::get('returnInvoices/search-pro','ReturnInvoicesController@search_pro');
 Route::post('returnInvoices/add_to_cart','ReturnInvoicesController@add_to_cart');
 Route::get('returnInvoices/update-qty/{id}/{value}','ReturnInvoicesController@update_qty');
 Route::post('returnInvoices/calc-total-cart','ReturnInvoicesController@calc_total_cart');
-    Route::post('returnInvoices/remove-cart/{id}/','ReturnInvoicesController@remove_from_cart');
+Route::post('returnInvoices/remove-cart/{id}/','ReturnInvoicesController@remove_from_cart');
 Route::resource('returnInvoices','ReturnInvoicesController');
 
-// ========================================================================
 // ==========================Invoice Routs==============================================
 
 Route::get('Invoices/search-pro','InvoicesController@search_pro');
 Route::post('Invoices/add_to_cart','InvoicesController@add_to_cart');
 Route::get('Invoices/update_price_D/{id}/{value}/{price_D}','InvoicesController@update_price_D');
 Route::get('Invoices/update-qty/{id}/{value}','InvoicesController@update_qty');
+
+
 Route::post('invoices/calc-total-cart','InvoicesController@calc_total_cart');
 Route::post('invoices/remove-cart/{id}','InvoicesController@deleteFromCart');
 Route::post('invoices/create','InvoicesController@save_invoice');

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\balance_factory;
 use App\factory;
+use App\movements;
 use App\product;
 use App\return_invoices;
 use App\return_invoice_details;
@@ -51,13 +53,105 @@ class ReturnInvoicesController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        $carts = cart_return_invoice::get();
 
-        $factories_id   = $request->factories_id;
-        $code           = $request->code;
-        $price          = $request->price;
-        $price_d        = $request->price_d;
-        $quantity       = $request->quantity;
+        $factories_id = $carts[0]['factories_id'];
+
+
+
+
+        $total = $request->total;
+        $paid = $request->paid;
+        $remain = $request->remain;
+        $type_buy = 1;
+        $done = 0;
+
+        $reasonString =  'فاتورة مرتجع رقم';
+                $return_Invoice = new return_invoices();
+        $return_Invoice['factories_id'] = $factories_id;
+        $return_Invoice['total_price'] = $total;
+        $return_Invoice['paid'] = $paid; //paid from maktab
+        $return_Invoice['remains'] = $remain;
+        $return_Invoice['type_buy'] = $type_buy;
+        $return_Invoice['done'] = $done;
+        $return_Invoice->save();
+
+       $factoryBalance = new balance_factory();
+        $factoryBalance->factories_id = $factories_id;
+        $factoryBalance->amount = $paid;
+        $factoryBalance->reason = $reasonString.' ('.$return_Invoice->id.')';
+        $factoryBalance->type_balance = 3;
+        // type balance : 0 => دفعة
+        // type balance : 1 => خصم
+        // type balance : 2 => فاتورة
+        // type balance : 3 => مرتجع
+        $factoryBalance->save();
+
+//
+//        $factory = factory::find($factories_id);
+//        $factory->paid +=  $paid; // 50
+//                                    //100 -50
+//        $factory->remain =  $factory->balance - $factory->paid ;
+//        $factory->balance -=  $total;
+//
+//
+//        $factory->save();
+
+
+
+         foreach ($carts as $cart)
+        {
+            $cart_return_invoice = new return_invoice_details();
+            $cart_return_invoice['return_invoices_id'] = $return_Invoice->id;
+            $cart_return_invoice['products_id'] = $cart['products_id'];
+
+            $cart_return_invoice['quantity'] = $cart['quantity'];
+            $cart_return_invoice['price'] = $cart['price'];
+            $cart_return_invoice['price_d'] = $cart['price_d'];
+            $cart_return_invoice->save();
+
+            $product = product::find($cart['products_id']);
+            $product->quantity -=  $cart['quantity'];
+            $product->save();
+
+            $movement = new movements();
+            $movement->products_id = $cart['products_id'];
+            $movement->type_movements_id = 3;
+            $movement->price = $product->price;
+            $movement->sell = $product->sell;
+            $movement->qty = $cart['quantity'];
+            $movement->reason = $reasonString.' ('.$return_Invoice->id.')';
+            $movement->save();
+
+
+
+
+        }
+
+
+
+        try {
+            cart_return_invoice::truncate();
+                \Session::flash('success','تم حفظ الفاتورة بنجاح');
+            return \Redirect::to('returnInvoices');
+        }catch (\Exception $e){
+
+             \Session::flash('error','لم يتم حفظ الفاتورة كود المنتج غير صحيح ');
+            return \Redirect::back();
+
+        }
+
+
+
+
+
+
+
+//        $factories_id   = $request->factories_id;
+//        $code           = $request->code;
+//        $price          = $request->price;
+//        $price_d        = $request->price_d;
+//        $quantity       = $request->quantity;
 
 
 
@@ -220,6 +314,16 @@ class ReturnInvoicesController extends Controller
     #Add To Cart
     public function add_to_cart(Request $request)
     {
+
+        $isExits = cart_return_invoice::where('products_id','=',$request->product_id)->exists() ;
+        if( $isExits == true){
+            \Session::flash('error','هذا المنتج موجود بالفعل ');
+            return \Redirect::back();
+
+        }
+
+
+
         $product = product::find($request->product_id);
 //        dd($product);
         $row = new cart_return_invoice();

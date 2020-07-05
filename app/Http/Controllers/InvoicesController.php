@@ -8,7 +8,9 @@ use App\return_invoices;
 use App\return_invoice_details;
 use App\cart_return_invoice;
 use App\cart;
-
+use App\invoices;
+use App\invoice_details;
+use App\movements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Input;
@@ -54,28 +56,73 @@ class InvoicesController extends Controller
      */
 
 public function save_invoice(Request $request){
-        dd($request->all());
+        // dd($request->all());
 
          $total   = $request->total;
-         $discount   = $request->discount;
-         $total_after_dis   = $request->total_after_dis;
+         $paid   = $request->paid;
+         $remain   = $request->remain;
          $factory_id   = $request->factory_id;
-      
+
+
+      $invoice_id = invoices::insertGetId([
+        'factories_id' => $factory_id,
+        'paid' => $paid,
+        'remains' => $remain,
+        'total_price' =>$total ,
+        'type_buy' => 1,
+        'done' => 0,
+    ]);
+      // dd($invoice_id);
+
+      // invoices_id','products_id','quantity','price','sell','sell_D','price_D'
 
         $carts  = cart::where('factories_id','=',$factory_id)->get();
 
         foreach($carts as $cart){
-            dump($cart);
+            // dump($cart);
             
-          $products_id           = $cart->products_id;
-      echo  $price          = $cart->price;
-        // $sell         = $cart->sell ;
-        $quantity       = $cart->quantity;
+        // $invoices_id   = $cart->invoices_id;
+        $products_id   = $cart->products_id;
+        $price         = $cart->price;
+        $sell          = $cart->sell ;
+        $quantity      = $cart->quantity;
+        $sell_D        = $cart->sell_D  ? $cart->sell_D  : 0 ;
+        $price_D      = $cart->price_D;
         
-        }
+        $invoice_details = invoice_details::create([
+            'invoices_id'=> $invoice_id,
+            'products_id'=> $products_id,
+            'quantity'=> $quantity,
+            'price'=> $price,
+            'sell'=> $sell,
+            'sell_D'=> $sell_D,
+            'price_D'=> $price_D
+        ]);
+
+        // dd($invoice_details);
+
+        $Product = product::find($products_id);  
+        $add_qty = $Product->quantity + $quantity;
+        $Product = product::where('id','=',$products_id)->update(['quantity' => $add_qty]);
+
+
+$reasonString = 'فاتورة رقم';
+ $movement = new movements();
+            $movement->products_id =  $products_id;
+            $movement->type_movements_id = 1;
+            $movement->price = $price;
+            $movement->sell = $sell;
+            $movement->qty = $quantity;
+            $movement->reason = $reasonString.' ('.$invoice_id.')';
+            $movement->save();
+
+// dd($add_qty);      
+
+  }
         // 
         // dd($quantity);
 
+return 'sucess';
 
 }
 
@@ -253,15 +300,13 @@ public function save_invoice(Request $request){
     {
         // dd($request->all());
 
-$isExits = cart::where('products_id','=',$request->product_id)->exists() ;
-if( $isExits == true){
- \Session::flash('error','هذا المنتج موجود بالفعل ');
-        return \Redirect::back();
+    $isExits = cart::where('products_id','=',$request->product_id)->exists() ;
+    if( $isExits == true){
+     \Session::flash('error','هذا المنتج موجود بالفعل ');
+            return \Redirect::back();
 
-}else{
-
-}
-        $product = product::find($request->product_id);
+    }
+            $product = product::find($request->product_id);
 
 //        dd($product);
         $row = new cart();
@@ -352,9 +397,9 @@ if( $isExits == true){
         $i = 0;
         foreach($cashs as $cash){
 
-            if($cash->price_d != null && $cash->price_d >0){
+            if($cash->price_D != null && $cash->price_D >0){
                 $i++;
-                $total += $cash->price_d*$cash->quantity;
+                $total += $cash->price_D*$cash->quantity;
             }else{
                 $total += $cash->price*$cash->quantity;
             }

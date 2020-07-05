@@ -43,6 +43,9 @@
                   @foreach($data as $key)
 
                       <tr>
+
+                              <input type="hidden" class="factory_id" name="factory_id" value="{{$key['factory']->id ? $key['factory']->id : 0 }}"> {{$key['factory']->name}}
+
                           <td class='text-center'>{{++$i}}</td>
                           <td class='text-center'>{{$key['factory']->name}}</td>
                           <td class='text-center'>{{$key['product']->code}}</td>
@@ -163,7 +166,8 @@
 
            <div class="col-md-4 form-group">
               <label>الإجمالي</label>
-              <input type="number" step="any" id="totals" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
+              <input type="hidden" step="any" id="totalsH" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
+               <input type="number" step="any" id="totals" min="0" style="padding:1px;padding-right:10px;" class="form-control" required>
            </div>
 
            <div class="col-md-4 form-group">
@@ -220,6 +224,10 @@ $.ajax({
             if(data.state == true){
                  $("#total_amount").css({"display":"block"});
                  $("#total_amount").text(data.total+' جنيه');
+                $("#totalsH").val(data.total);
+                 $("#totals").val(data.total);
+
+                $("#totals").attr('disabled','disabled');
 //                 $("#totals").placeholder(data.total);
             }
         }
@@ -229,7 +237,17 @@ $.ajax({
   });
 
 
+var    factory_id = $('.factory_id').val();
+// alert(factory_id);
+if( factory_id === undefined  || factory_id === ''   ){
 
+} else{
+
+    $('#factory').val(factory_id);
+    $("#factory").attr('disabled','disabled');
+    $('#factories_id').val(factory_id);
+
+}
 
 
 
@@ -354,7 +372,7 @@ function submit_qty_{{$jscode->id}}(id){
         }
     });
 return false;
-};
+}
 
 </script>
 {{--   @endforeach--}}

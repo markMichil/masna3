@@ -65,7 +65,7 @@
                      
 
 
-                              <td class="text-center" id="total_price_{{$key->id}}"></td>
+                              <td class="text-center" id="total_price_all{{$key->id}}" ></td>
                         
 
                           <td class='text-center'>
@@ -174,19 +174,19 @@
         <div class="col-md-12" style="margin-top:20px;">
 
            <div class="col-md-4 form-group">
-              <label>المدفوع</label>
+              <label>الاجمالي</label>
               <input type="hidden" step="any" id="totalsH" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
               <input type="number" step="any" id="totals" min="0"  style="padding:1px;padding-right:10px;" class="form-control"  required>
            </div>
 
            <div class="col-md-4 form-group">
-              <label>الخصم</label>
-              <input type="number" step="any" id="discount" min="0" style="padding:1px;padding-right:10px;" onkeyup="calc_remain();"  class="form-control" name="discount" required>
+              <label>المدفوع</label>
+              <input type="number" step="any" id="discount" min="0" style="padding:1px;padding-right:10px;" onkeyup="calc_remain();"  class="form-control" name="paid" required>
            </div>
 
            <div class="col-md-4 form-group">
-              <label>الإجمالي بعد الخصم</label>
-              <input type="number" id="after_dis" step="any" style="padding:1px;padding-right:10px;" class="form-control" name="total_after_dis" required>
+              <label>المتبقي</label>
+              <input type="number" id="after_dis" step="any" style="padding:1px;padding-right:10px;" class="form-control" name="remain" required>
            </div>
 
 
@@ -354,25 +354,26 @@ function calc_remain(){
 @foreach($data as $jscode)
 {{--   @foreach(App\Product::where('id',$jscode->products_id)->get() as $jsfun)--}}
 <script>
-$(document).ready(function(){
 
-   var sell =  $("#sell_{{$jscode->id}}").val();
 
-   if(sell != 0 ){
-       var unit_price_ = $("#unit_price_{{$jscode ->id}}").text();
-            unit_price = unit_price_ - sell ;
-// alert(unit_price);
-            
-   } else{
+var unit_price = $("#price_D_{{$jscode->id}}").val();
 
-       var unit_price = $("#unit_price_{{$jscode ->id}}").text();
-// alert(unit_price);
-   }
-   // alert(sell);
+    var qty = $("#qty_{{$jscode->id}}").val();
+    // alert(unit_price);
 
-   var qty = $("#qty_{{$jscode ->id}}").val();
-  $("#total_price_{{$jscode->id}}").text(unit_price*qty);
-});
+    if(unit_price == 0){
+  var _price = $("#unit_price_{{$jscode->id}}").text();
+
+    var allTotal= _price*qty;
+
+} else{
+    var allTotal= unit_price*qty;
+
+}
+// document.getElementById("total_price_{{$jscode->id}}").append(allTotal);
+    $("#total_price_all{{$jscode->id}}").text(allTotal);
+
+
 
 function submit_qty_{{$jscode->id}}(id){
 
@@ -396,11 +397,11 @@ if(unit_price == 0){
     var allTotal= unit_price*qty;
 
 }
-    $("#total_price_{{$jscode->id}}").text(allTotal);
+    $("#total_price_all{{$jscode->id}}").text(allTotal);
 } else{
   var unit_price = $("#unit_price_{{$jscode->id}}").text();
     var qty = $("#qty_{{$jscode->id}}").val();
-    $("#total_price_{{$jscode->id}}").text(unit_price*qty);
+    $("#total_price_all{{$jscode->id}}").text(unit_price*qty);
 }
 
 
@@ -441,6 +442,8 @@ if(unit_price == 0){
 
 
 $("#price_D_{{$jscode->id}}").change(function(){
+  $("#total_amount").css({"display":"none"});
+
 var id = {{$jscode->id}};
 // alert(id);
   var unit_price = $("#price_D_{{$jscode->id}}").val();
@@ -459,7 +462,7 @@ var id = {{$jscode->id}};
 
 }
 
-    $("#total_price_{{$jscode->id}}").text(allTotal);
+    $("#total_price_all{{$jscode->id}}").text(allTotal);
 
 
   var value = qty; 
@@ -483,46 +486,7 @@ var id = {{$jscode->id}};
     });
 });
 
-function submit_price_D_{{$jscode->id}}(id){
 
-
-
-
-
-    // @if($jscode['product']->price_D != null)
-
-    var unit_price = $("#price_D_{{$jscode->id}}").val();
-
-    var qty = $("#qty_{{$jscode->id}}").val();
-    // alert(qty);
-    $("#total_price_{{$jscode->id}}").text(unit_price*qty);
-    // @else
-    // var unit_price = $("#unit_price_{{$jscode->id}}").text();
-    // var qty = $("#qty_{{$jscode->id}}").val();
-    // $("#total_price_{{$jscode->id}}").text(unit_price*qty);
-    //     @endif
-
-// alert(1111);
-  var value = $("#price_D_{{$jscode->id}}").val();
-  // alert(value);
-  var Url = "{{ url('Invoices/update_price_D/') }}/"+id+'/'+value+'';
-
-  $.ajaxSetup({
-      headers: {
-         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-      }
-  });
-
-  $.ajax({
-        url : Url,
-        type : "GET",
-        dataType : "json",
-        success : function(data){
-            console.log(data);
-        }
-    });
-return false;
-}
 
 </script>
 {{--   @endforeach--}}
