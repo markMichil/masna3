@@ -53,32 +53,38 @@ class ReturnInvoicesController extends Controller
      */
     public function store(Request $request)
     {
+//        dd($request->all());
+
         $carts = cart_return_invoice::get();
 
         $factories_id = $carts[0]['factories_id'];
 
 
 
-
+        // total mortag3
         $total = $request->total;
+        // dof3a
         $paid = $request->paid;
+        //remain from balnce
         $remain = $request->remain;
+
+
         $type_buy = 1;
         $done = 0;
 
         $reasonString =  'فاتورة مرتجع رقم';
-                $return_Invoice = new return_invoices();
+        $return_Invoice = new return_invoices();
         $return_Invoice['factories_id'] = $factories_id;
         $return_Invoice['total_price'] = $total;
-        $return_Invoice['paid'] = $paid; //paid from maktab
-        $return_Invoice['remains'] = $remain;
+        $return_Invoice['paid'] = $total; //paid from maktab
+        $return_Invoice['remains'] = 0;
         $return_Invoice['type_buy'] = $type_buy;
         $return_Invoice['done'] = $done;
         $return_Invoice->save();
 
        $factoryBalance = new balance_factory();
         $factoryBalance->factories_id = $factories_id;
-        $factoryBalance->amount = $paid;
+        $factoryBalance->amount = $total;
         $factoryBalance->reason = $reasonString.' ('.$return_Invoice->id.')';
         $factoryBalance->type_balance = 3;
         // type balance : 0 => دفعة
@@ -87,15 +93,33 @@ class ReturnInvoicesController extends Controller
         // type balance : 3 => مرتجع
         $factoryBalance->save();
 
-//
-//        $factory = factory::find($factories_id);
-//        $factory->paid +=  $paid; // 50
-//                                    //100 -50
-//        $factory->remain =  $factory->balance - $factory->paid ;
-//        $factory->balance -=  $total;
-//
-//
-//        $factory->save();
+
+        $factory = factory::find($factories_id);
+        $factory->balance -=  $total;
+
+        if($paid == 0){
+            $factory->remain -=  $total;
+        }else{
+            $factoryBalance = new balance_factory();
+            $factoryBalance->factories_id = $factories_id;
+            $factoryBalance->amount = $paid;
+            $reasonString =  'دفعة مع فاتورة المرتجع رقم';
+            $factoryBalance->reason = $reasonString.' ('.$return_Invoice->id.')';
+           $factoryBalance->type_balance = 0;
+            // type balance : 0 => دفعة
+            // type balance : 1 => خصم
+            // type balance : 2 => فاتورة
+            // type balance : 3 => مرتجع
+            $factoryBalance->save();
+            $factory->remain -=  $total+$paid;
+        }
+
+        $factory->save();
+
+
+
+
+
 
 
 
@@ -142,101 +166,6 @@ class ReturnInvoicesController extends Controller
         }
 
 
-
-
-
-
-
-//        $factories_id   = $request->factories_id;
-//        $code           = $request->code;
-//        $price          = $request->price;
-//        $price_d        = $request->price_d;
-//        $quantity       = $request->quantity;
-
-
-
-
-//        try {
-//            return DB::transaction(function()
-//            {
-//                $factoryId        = Input::get('factories_id');
-//
-//
-//                $row             = new return_invoices();
-//                $row->factories_id   = $factoryId->id;
-//
-//                $row->code   = Input::get('code');
-//                $row->price      = Input::get('price');
-//                $row->price      = Input::get('price');
-//                $row->qty        = Input::get('qty');
-//
-//                $row->save();
-//
-//
-//                $movment = new item_movement;
-//                $movment->pro_code   = Input::get('pro_code');
-//                $movment->type_go    = 2;
-//                $movment->type_id    = $row->id;
-//                $movment->price      = Input::get('price');
-//                $movment->qty        = Input::get('qty');
-//                $movment->reason     = '  فاتورة مرتجع  فواتير مشتريات';
-//                $movment->save();
-//
-//                $pro = Product::where('pro_code',$row->pro_code)->first();
-//                $pro->qty = $pro->qty - $row->qty;
-//                $pro->save();
-//
-//                if(!empty(Input::get('pro_codes'))) {
-//                    $features = [];
-//                    foreach(Input::get('pro_codes') as $key => $feature){
-//                        $features[] = [
-//                            'invoice_id' => $row->id,
-//                            'pro_code' => Input::get('pro_codes')[$key],
-//                            'price' => Input::get('prices')[$key],
-//                            'qty' => Input::get('qtys')[$key],
-//                            'content' => Input::get('contents')[$key]
-//                        ];
-//                        $pps = Product::where('pro_code',Input::get('pro_codes')[$key])->first();
-//                        $pps->qty = $pps->qty - Input::get('qtys')[$key];
-//                        $pps->save();
-//
-//                        $movment = new item_movement;
-//                        $movment->pro_code   = Input::get('pro_codes')[$key];
-//                        $movment->type_go    = 1;
-//                        $movment->type_id    = $row->id;
-//                        $movment->price      = Input::get('prices')[$key];
-//                        $movment->qty        = Input::get('qtys')[$key];
-//                        $movment->reason     = 'فاتورة مرتجع  فواتير مشتريات ';
-//                        $movment->save();
-//
-//
-//                    }
-//                    Return_invoice_attribute::insert($features);
-//                }
-//
-//                if(Input::get('paid') > 0) {
-//                    /* Balance */
-//                    $rows = new Balance;
-//                    $rows->type = 3;
-//                    $rows->date = date('Y-m-d');
-//                    $rows->amount = $row->paid;
-//                    $rows->reason = 'فاتورة مرتجع  فواتير مشتريات';
-//                    $rows->save();
-//                }
-//
-//
-//
-//
-//                Session::flash('success','تم حفظ الفاتورة بنجاح');
-//                return Redirect::to('returnInvoices');
-//            });
-//
-//
-//        }catch(\Exception $e) {
-//            dd($e);
-//            Session::flash('error','لم يتم حفظ الفاتورة كود المنتج غير صحيح ');
-//            return Redirect::back();
-//        }
 
     }
 

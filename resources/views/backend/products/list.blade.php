@@ -39,7 +39,7 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($data as $key => $row)
-                                                       @if($row->qty <= 0)
+                                                       @if($row->quantity <= 5)
                                                          <tr style="background:#ffe0e0">
                                                       @else
                                                          <tr>

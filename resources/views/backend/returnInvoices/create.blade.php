@@ -39,7 +39,10 @@
                     </tr>
                </thead>
                <tbody>
-               <?php $i = 0 ?>
+               <?php
+               $i = 0;
+               $balanceFactory = 0;
+               ?>
                   @foreach($data as $key)
 
                       <tr>
@@ -47,7 +50,9 @@
                               <input type="hidden" class="factory_id" name="factory_id" value="{{$key['factory']->id ? $key['factory']->id : 0 }}"> {{$key['factory']->name}}
 
                           <td class='text-center'>{{++$i}}</td>
-                          <td class='text-center'>{{$key['factory']->name}}</td>
+                          <td class='text-center'>{{$key['factory']->name}}<br>{{$key['factory']->balance}}</td>
+                          <?php $balanceFactory = $key['factory']->balance; ?>
+                          <input type="hidden" name="balanceNow" id="balanceNow" value="{{$key['factory']->balance}}">
                           <td class='text-center'>{{$key['product']->code}}</td>
                           <td class='text-center' id="unit_price_{{$key->id}}">{{$key->price}}</td>
                           <td class='text-center' id="unit_price_d_{{$key->id}}">{{($key->price_d >0 )?$key->price_d:'لأا يوج خصم'}}</td>
@@ -156,6 +161,7 @@
       <div class="panel panel-default">
             <div class="panel-heading">
               <h3 class="panel-title">بيانات الفاتورة</h3>
+              <h3 class="panel-footer">حساب المصنع ({{ $balanceFactory }})</h3>
             </div>
       
       <div class="panel-body">
@@ -165,18 +171,18 @@
         <div class="col-md-12" style="margin-top:20px;">
 
            <div class="col-md-4 form-group">
-              <label>الإجمالي</label>
+              <label>الإجمالي الفلوس للمرتجع</label>
               <input type="hidden" step="any" id="totalsH" min="0" style="padding:1px;padding-right:10px;" class="form-control" name="total" required>
                <input type="number" step="any" id="totals" min="0" style="padding:1px;padding-right:10px;" class="form-control" required>
            </div>
 
            <div class="col-md-4 form-group">
-              <label>المدفوع </label>
+              <label>دفعة الحساب </label>
               <input type="number" step="any" id="discount" min="0" style="padding:1px;padding-right:10px;" onkeyup="calc_remain();"  class="form-control" name="paid" required>
            </div>
 
            <div class="col-md-4 form-group">
-              <label>المتبقى</label>
+              <label>متبقى الحساب</label>
               <input type="number" id="after_dis" step="any" style="padding:1px;padding-right:10px;" class="form-control" name="remain" required>
            </div>
 
@@ -315,9 +321,10 @@ $('#search_btn').on('click', function(){
 
 
 function calc_remain(){
-   var total = $("#totals").val();
+   var totalFatora = $("#totals").val();
+   var total = $("#balanceNow").val();
    var dis = $("#discount").val();
-   var after = total-dis;
+   var after = total-dis-totalFatora;
    $("#after_dis").val(after);
 }
 
