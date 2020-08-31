@@ -76,7 +76,11 @@
                     </tr>
                </thead>
                <tbody>
-             <?php $in = App\Balance::where('type',0)->sum('amount'); $out = App\Balance::where('type',1)->sum('amount'); $total = $in-$out; ?>
+             <?php
+             $in = App\Balance::where('type_balance',0)->sum('amount');
+             $out = App\Balance::where('type_balance',1)->sum('amount');
+             $total = $in-$out;
+             ?>
                 @foreach($data as $key => $row)
                     @if($row->type == 1)
                         <tr style="background:#ffe0e0">
@@ -84,7 +88,7 @@
                         <tr>
                     @endif
                           <td class='text-center'>{{$key+1}}</td>
-                          <td class='text-center'>{{$row->date}}</td>
+                          <td class='text-center'>{{$row->created_at}}</td>
                           <td class='text-center'>{{$row->amount}}</td>
                           <td class='text-center'>{{$row->reason}}</td>
                           <td class='text-center'>

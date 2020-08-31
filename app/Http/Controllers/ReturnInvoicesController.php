@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\balance;
 use App\balance_factory;
 use App\factory;
+use App\User;
 use App\movements;
 use App\product;
 use App\return_invoices;
 use App\return_invoice_details;
 use App\cart_return_invoice;
+//use http\Client\Curl\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class ReturnInvoicesController extends Controller
@@ -21,6 +25,7 @@ class ReturnInvoicesController extends Controller
      */
     public function index()
     {
+
 
         $data = return_invoices::with('factory')
             ->with('return_invoice_details')
@@ -72,7 +77,7 @@ class ReturnInvoicesController extends Controller
         $type_buy = 1;
         $done = 0;
 
-        $reasonString =  'فاتورة مرتجع رقم';
+        $reasonString =  'فاتورة مرتجع مصنع رقم';
         $return_Invoice = new return_invoices();
         $return_Invoice['factories_id'] = $factories_id;
         $return_Invoice['total_price'] = $total;
@@ -92,6 +97,19 @@ class ReturnInvoicesController extends Controller
         // type balance : 2 => فاتورة
         // type balance : 3 => مرتجع
         $factoryBalance->save();
+
+        $balance = new balance();
+        $balance->users_id = Auth::user()->id;
+        $balance->amount = $total;
+        $balance->reason = $reasonString.' ('.$return_Invoice->id.')';
+        $balance->type_balance = 3;
+        // type balance : 0 => دفعة
+        // type balance : 1 => خصم
+        // type balance : 2 => فاتورة
+        // type balance : 3 => مرتجع
+        $balance->save();
+
+
 
 
         $factory = factory::find($factories_id);
@@ -115,6 +133,30 @@ class ReturnInvoicesController extends Controller
         }
 
         $factory->save();
+
+
+        $user = User::find(Auth::user()->id);
+        $user->balance -=  $total;
+
+        if($paid == 0){
+            $user->remain -=  $total;
+        }else{
+            $balanceUser = new balance();
+            $balanceUser->users_id = Auth::user()->id;
+            $balanceUser->amount = $paid;
+            $reasonString =  'دفعة مع فاتورة المرتجع رقم';
+            $balanceUser->reason = $reasonString.' ('.$return_Invoice->id.')';
+            $balanceUser->type_balance = 0;
+            // type balance : 0 => دفعة
+            // type balance : 1 => خصم
+            // type balance : 2 => فاتورة
+            // type balance : 3 => مرتجع
+            $balanceUser->save();
+            $user->remain -=  $total+$paid;
+            $user->paid +=  $paid;
+        }
+
+        $user->save();
 
 
 

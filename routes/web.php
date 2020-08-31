@@ -38,6 +38,8 @@ Route::post('customer/edit', 'ClientsController@update');
 Route::get('customer/delete/{id}', 'ClientsController@destroy');
 // ==========================Product Routs ========================================
 Route::resource('products','ProductController');
+// ==========================balance Routs ========================================
+Route::resource('balance','BalanceController');
 
 // ==========================Item Movment Routs ========================================
 Route::resource('ItemMovement','MovementsController');
